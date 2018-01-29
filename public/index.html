@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" />
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <style>
+    html,body,#app {
+      height:100%;
+    }
+  </style>
+
+  <title>comp-asus</title>
+</head>
+
+<body>
+  <div id="app" v-on:dragover.stop.prevent v-on:drop.stop.prevent="drop">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <span class="navbar-brand" href="#">{{currentPath}}</span>
+    </nav>
+    <div class="list-group list-group-flush">
+        <a class="list-group-item list-group-item-action"
+           v-for="file in files"
+           v-bind:href="'/api/file/' + file" download>
+          <span class="oi oi-file"></span> {{file}}
+          <button type="button" class="float-right close"
+            v-on:click.stop.prevent="removeFile(file)">
+              <span aria-hidden="true">&times;</span></button>
+        </a>
+    </div>
+    <!-- <form>
+      <input type="file" name="file" id="file">
+      <button type="submit" v-on:click="sendFile">Upload</button>
+    </form> -->
+  </div>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        currentPath: '',
+        files: [],
+        percentCompleted: null
+      },
+      methods: {
+        loadFiles() {
+          axios.get('/api/file')
+            .then(res => this.files = res.data)
+            .catch(err => console.log(err))
+          axios.get('/api/root')
+            .then(res => this.currentPath = res.data)
+            .catch(err => console.log(err))
+        },
+        sendFile(file) {
+          let data = new FormData();
+          data.append('file', file);
+
+          let config = {
+            onUploadProgress: function (progressEvent) {
+              this.percentCompleted = 
+                Math.round( (progressEvent.loaded * 100) / progressEvent.total )
+            }
+          }
+
+          axios.post('/api/file', data, config)
+            .then((res) => this.loadFiles())
+            .catch(function (err) {
+              if (err) throw err;
+            });
+        },
+        removeFile(file) {
+          axios.delete('/api/file/' + file)
+            .then((res) => this.loadFiles())
+            .catch(function (err) {
+              if (err) throw err;
+            });
+        },
+        drop(evt) {
+          let files = evt.target.files || evt.dataTransfer.files
+          if (files[0]) this.sendFile(files[0])
+        }
+      },
+      created: function () {
+        this.loadFiles()
+      }
+    })
+  </script>
+</body>
+
+</html>
