@@ -7,21 +7,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css"
+  />
 
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-  
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+
   <script src="https://unpkg.com/vue"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
   <style>
-    html,body,#app {
-      height:100%;
+    html,
+    body,
+    #app {
+      height: 100%;
+    }
+
+    .options {
+      display: inline-block;
     }
   </style>
 
@@ -34,14 +45,20 @@
       <span class="navbar-brand" href="#">{{currentPath}}</span>
     </nav>
     <div class="list-group list-group-flush">
-        <a class="list-group-item list-group-item-action"
-           v-for="file in files"
-           v-bind:href="'/api/file/' + file" download>
-          <span class="oi oi-file"></span> {{file}}
-          <button type="button" class="float-right close"
-            v-on:click.stop.prevent="removeFile(file)">
-              <span aria-hidden="true">&times;</span></button>
-        </a>
+      <a class="list-group-item list-group-item-action flex-column align-items-start" v-for="file in files" v-bind:href="'/api/file/' + file"
+        download>
+        <span class="oi oi-file"></span> {{file}}
+        <div class="options dropdown float-right">
+          <button class="btn btn-sm" data-toggle="dropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
+            ...
+          </button>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+            <button class="dropdown-item" href="#" v-on:click.prevent="removeFile(file)">Remover</button>
+            <button class="dropdown-item" href="#" v-on:click.prevent="copyToClipboard(file)">Copiar link</button>
+          </div>
+        </div>
+      </a>
     </div>
     <!-- <form>
       <input type="file" name="file" id="file">
@@ -72,8 +89,8 @@
 
           let config = {
             onUploadProgress: function (progressEvent) {
-              this.percentCompleted = 
-                Math.round( (progressEvent.loaded * 100) / progressEvent.total )
+              this.percentCompleted =
+                Math.round((progressEvent.loaded * 100) / progressEvent.total)
             }
           }
 
@@ -93,6 +110,16 @@
         drop(evt) {
           let files = evt.target.files || evt.dataTransfer.files
           if (files[0]) this.sendFile(files[0])
+        },
+        copyToClipboard(file){
+          let temp = document.createElement('INPUT')
+          document.querySelector('body').append(temp)
+          temp.setAttribute('type', 'text')
+          temp.setAttribute('value', window.location.origin+'/api/file/'+file)
+          temp.select();
+          console.log(temp)
+          document.execCommand("copy");
+          temp.remove();
         }
       },
       created: function () {
